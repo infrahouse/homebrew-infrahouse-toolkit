@@ -12,7 +12,16 @@ Or `brew tap infrahouse/infrahouse-toolkit` and then `brew install infrahouse-to
 
 ### Update version
 
-1. Update version in a tarball URL and its sha256.
-
-2. Run `brew update-python-resources Formula/infrahouse-toolkit.rb`
-3. git-push to master
+Update version in a tarball URL and its sha256 in `Formula/infrahouse-toolkit.rb`.
+```
+curl -L https://github.com/infrahouse/infrahouse-toolkit/archive/refs/tags/2.28.0.tar.gz  | sha256sum
+```
+Update dependencies.
+```
+brew update-python-resources Formula/infrahouse-toolkit.rb
+```
+Commit & push to master
+```
+git commit -am "Release 2.28.0"
+git push
+```

@@ -4,7 +4,7 @@ class InfrahouseToolkit < Formula
   desc "Toolkit for various operations on infrastructure components"
   homepage "https://github.com/infrahouse/infrahouse-toolkit"
   url "https://github.com/infrahouse/infrahouse-toolkit/archive/refs/tags/2.28.0.tar.gz"
-  sha256 "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  sha256 "6ef3373786ac4f463c82f16c75974de98a9f59cbc9ec5b6ad8c487ecf3defc0d"
   license "Apache-2.0"
 
   depends_on "python@3.12"
