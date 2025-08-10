@@ -9,6 +9,7 @@ class InfrahouseToolkit < Formula
 
   depends_on "python@3.12"
   depends_on "rust"
+  depends_on "libsodium"
 
   resource "acme" do
     url "https://files.pythonhosted.org/packages/48/df/d006c4920fd04b843c21698bd038968cb9caa3315608f55abde0f8e4ad6b/acme-4.2.0.tar.gz"
