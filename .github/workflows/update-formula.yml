@@ -1,0 +1,58 @@
+---
+name: Update formula
+
+on:
+  repository_dispatch:
+    types: [new-release]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g. 2.56.0)"
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    name: Update infrahouse-toolkit formula
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Determine tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            TAG="${{ github.event.client_payload.tag }}"
+          else
+            TAG="${{ github.event.inputs.tag }}"
+          fi
+          # Strip leading 'v' if present
+          TAG="${TAG#v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Checkout tap repository
+        uses: actions/checkout@v4
+
+      - name: Update formula version and sha256
+        run: |
+          python3 scripts/update-formula-version.py Formula/infrahouse-toolkit.rb "${{ steps.tag.outputs.tag }}"
+
+      - name: Update Python resources
+        run: brew update-python-resources Formula/infrahouse-toolkit.rb
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Update infrahouse-toolkit to ${{ steps.tag.outputs.tag }}"
+          branch: "update-infrahouse-toolkit-${{ steps.tag.outputs.tag }}"
+          title: "Update infrahouse-toolkit to ${{ steps.tag.outputs.tag }}"
+          body: |
+            Automated update triggered by a new release of infrahouse-toolkit.
+
+            **Version:** ${{ steps.tag.outputs.tag }}
+            **Release:** https://github.com/infrahouse/infrahouse-toolkit/releases/tag/${{ steps.tag.outputs.tag }}
