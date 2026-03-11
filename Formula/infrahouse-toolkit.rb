@@ -8,6 +8,7 @@ class InfrahouseToolkit < Formula
   license "Apache-2.0"
 
   depends_on "libsodium"
+  depends_on "openssl@3"
   depends_on "python@3.12"
   depends_on "rust"
 
