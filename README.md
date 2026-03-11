@@ -1,27 +1,56 @@
-# Infrahouse-toolkit tap.formula
+# Homebrew Tap for InfraHouse Toolkit
 
-## How do I install infrahouse-toolkit with homebrew?
+A [Homebrew](https://brew.sh) tap for installing
+[infrahouse-toolkit](https://github.com/infrahouse/infrahouse-toolkit) on macOS and Linux.
 
-`brew install infrahouse/infrahouse-toolkit/infrahouse-toolkit`
+## Installation
 
-Or `brew tap infrahouse/infrahouse-toolkit` and then `brew install infrahouse-toolkit`.
+```bash
+brew install infrahouse/infrahouse-toolkit/infrahouse-toolkit
+```
+
+Or add the tap first:
+
+```bash
+brew tap infrahouse/infrahouse-toolkit
+brew install infrahouse-toolkit
+```
+
+## Upgrading
+
+```bash
+brew update
+brew upgrade infrahouse-toolkit
+```
+
+## Uninstalling
+
+```bash
+brew uninstall infrahouse-toolkit
+```
 
 ## Documentation
 
-`brew help`, `man brew` or check [Homebrew's documentation](https://docs.brew.sh).
+For usage documentation, available commands, and configuration options, see the
+[infrahouse-toolkit README](https://github.com/infrahouse/infrahouse-toolkit).
 
-### Update version
+## How Updates Work
 
-Update version in a tarball URL and its sha256 in `Formula/infrahouse-toolkit.rb`.
-```
-curl -L https://github.com/infrahouse/infrahouse-toolkit/archive/refs/tags/2.28.0.tar.gz  | sha256sum
-```
-Update dependencies.
-```
-brew update-python-resources Formula/infrahouse-toolkit.rb
-```
-Commit & push to master
-```
-git commit -am "Release 2.28.0"
-git push
-```
+Formula updates are automated. When a new version of
+[infrahouse-toolkit](https://github.com/infrahouse/infrahouse-toolkit) is released,
+a GitHub Actions workflow automatically creates a PR that updates the formula version,
+checksum, and Python dependencies.
+
+## Manual Version Update
+
+If you need to update the formula manually:
+
+1. Update the version and sha256 in `Formula/infrahouse-toolkit.rb`:
+   ```bash
+   curl -L https://github.com/infrahouse/infrahouse-toolkit/archive/refs/tags/<VERSION>.tar.gz | sha256sum
+   ```
+2. Update Python dependencies:
+   ```bash
+   brew update-python-resources Formula/infrahouse-toolkit.rb
+   ```
+3. Commit and push.
