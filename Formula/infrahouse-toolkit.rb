@@ -7,9 +7,9 @@ class InfrahouseToolkit < Formula
   sha256 "2ca6a842519549115c80135165f5a81ba1beef9dcf80ff22168e2bfee2966c5f"
   license "Apache-2.0"
 
+  depends_on "libsodium"
   depends_on "python@3.12"
   depends_on "rust"
-  depends_on "libsodium"
 
   resource "acme" do
     url "https://files.pythonhosted.org/packages/48/df/d006c4920fd04b843c21698bd038968cb9caa3315608f55abde0f8e4ad6b/acme-4.2.0.tar.gz"
