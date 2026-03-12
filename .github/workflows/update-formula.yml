@@ -31,23 +31,23 @@ jobs:
           TAG="${TAG#v}"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-
       - name: Checkout tap repository
         uses: actions/checkout@v4
+
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
 
       - name: Update formula version and sha256
         run: |
           python3 scripts/update-formula-version.py Formula/infrahouse-toolkit.rb "${{ steps.tag.outputs.tag }}"
 
       - name: Update Python resources
-        run: brew update-python-resources Formula/infrahouse-toolkit.rb
+        run: brew update-python-resources infrahouse-toolkit
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
           commit-message: "Update infrahouse-toolkit to ${{ steps.tag.outputs.tag }}"
           branch: "update-infrahouse-toolkit-${{ steps.tag.outputs.tag }}"
           title: "Update infrahouse-toolkit to ${{ steps.tag.outputs.tag }}"
