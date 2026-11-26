@@ -45,10 +45,14 @@ brew install infrahouse/tap/infrahouse-toolkit
 
 ## How a new release reaches the formula
 
-Each toolkit release attaches the tarball and its `.sha256` to the GitHub release `v<version>`. For now, a pull
-request here updates the formula's `url` and `sha256` by hand ([CLAUDE.md](CLAUDE.md) has the steps); automating it
-from the toolkit's release is planned. The pull request's CI installs and tests the new formula, and once it merges,
-`brew upgrade` installs the new version.
+Each toolkit release attaches the tarball and its `.sha256` to the GitHub release `v<version>`. Then the toolkit's CD
+opens a pull request here, `infrahouse-toolkit <version>`, that changes the formula's `url` and `sha256` to the
+release's. The GitHub App `infrahouse-homebrew-tap` opens it, so this repository's CI runs on it:
+`infrahouse-toolkit formula` installs and tests the new formula. Aleks reviews and merges it; nothing merges it
+automatically. Once it's merged, `brew update && brew upgrade infrahouse-toolkit` installs the release.
+
+If the toolkit's CD can't open the pull request, its run turns red and says why. A hand edit is the fallback
+([CLAUDE.md](CLAUDE.md) has the steps).
 
 ## CI
 
