@@ -71,8 +71,9 @@ CI is the test: it installs the formula on a clean runner. Don't run `brew insta
 Terraform in `infrahouse/github-control` (`modules/plain-repo/repos-files.tf`) writes `renovate.json`,
 `.github/workflows/vuln-scanner-pr.yml`, `.claude/CODING_STANDARD.md` and `.claude/instructions.md` here. Don't edit
 them in this repository: the next apply puts them back. The tap's Renovate settings are in github-control's
-`modules/plain-repo/files/overrides/homebrew-tap/renovate.json`, which turns off Renovate's `homebrew` manager: new
-releases reach the formula through the toolkit's release, not Renovate.
+`modules/plain-repo/files/overrides/homebrew-tap/renovate.json`, which turns off Renovate's `homebrew` manager: a new
+release reaches the formula through a pull request here, by hand until the toolkit's CD opens it (IH-190), never
+through Renovate.
 
 ## Formatting Rules
 
