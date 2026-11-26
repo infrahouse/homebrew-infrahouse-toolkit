@@ -78,7 +78,8 @@ The fallback, when the toolkit's `publish-homebrew` can't open the pull request 
    a version that isn't `<major>.<minor>.<patch>`.
 4. Open a pull request from a branch named `toolkit-<version>`. Its CI installs and tests the new formula. With that
    branch name, a later re-run of `publish-homebrew` finds the pull request and updates it rather than opening a
-   second one.
+   second one. This is the one time to push to that branch yourself: it holds the same change CD would make, and a
+   re-run replaces your commit with CD's single commit of that change, which is what the rule above expects.
 
 ## Testing
 
