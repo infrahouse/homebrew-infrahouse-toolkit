@@ -1,0 +1,94 @@
+---
+# Style-checks, audits, installs and tests the formula on every pull request and every push to main.
+# "infrahouse-toolkit formula", the job's check, is a required check on main, set in infrahouse/github-control
+# (repos.tf, required_status_checks). Rename the job there and here together, or no pull request can merge.
+name: Formula
+
+on:  # yamllint disable-line rule:truthy
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  formula:
+    name: infrahouse-toolkit formula
+    # The formula is arm64 macOS only (depends_on arch: :arm64); macos-15 runners are Apple Silicon.
+    runs-on: macos-15
+    timeout-minutes: 30
+    defaults:
+      run:
+        # bash --noprofile --norc -eo pipefail: a failing brew in a pipeline fails the step.
+        shell: bash
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: "1"
+      HOMEBREW_NO_ENV_HINTS: "1"
+      HOMEBREW_NO_INSTALL_CLEANUP: "1"
+    steps:
+      # Checks this commit out as a tap in Homebrew's Taps directory and trusts it. The tap is named after
+      # github.repository: infrahouse/homebrew-<name> is the tap infrahouse/<name>, so this workflow runs
+      # unchanged before and after the repository's rename.
+      - name: Set up Homebrew
+        id: setup-homebrew
+        uses: Homebrew/actions/setup-homebrew@61b401267256bb9c047d6d1481b176d5772a0ba7  # 2026.11.23.1
+
+      - name: Name the tap and the formula
+        env:
+          TAP: ${{ steps.setup-homebrew.outputs.tap-name }}
+        run: |
+          if [ -z "$TAP" ]; then
+            echo "::error::setup-homebrew found no tap in $GITHUB_REPOSITORY: is it named <owner>/homebrew-<tap>?"
+            exit 1
+          fi
+          echo "TAP=$TAP" >> "$GITHUB_ENV"
+          echo "FORMULA=$TAP/infrahouse-toolkit" >> "$GITHUB_ENV"
+          echo "Tap $TAP, formula $TAP/infrahouse-toolkit"
+
+      - name: brew style
+        run: brew style "$TAP"
+
+      - name: brew audit
+        run: brew audit --strict --online --formula "$FORMULA"
+
+      - name: brew install
+        run: brew install --formula "$FORMULA"
+
+      # Homebrew infers the version from the url. A url whose file name it parses wrongly (for example as
+      # 2.68.1-macos-arm64) needs an explicit version line in the formula.
+      - name: brew info
+        run: |
+          brew info --formula "$FORMULA"
+          version="$(brew info --json=v2 --formula "$FORMULA" | jq -r '.formulae[0].versions.stable')"
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::The formula's version is '$version', not <major>.<minor>.<patch>"
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: brew test
+        run: brew test "$FORMULA"
+
+      # As a user runs them: through Homebrew's links, $(brew --prefix)/bin -> Cellar -> libexec/bin.
+      - name: Run the scripts from Homebrew's bin
+        run: |
+          bin="$(brew --prefix)/bin"
+          ls -l "$bin/ih-ec2" "$bin/ih-puppet"
+          "$bin/ih-ec2" --version
+          "$bin/ih-puppet" --help
+          if [ "$("$bin/ih-ec2" --version)" != "ih-ec2, version $VERSION" ]; then
+            echo "::error::$bin/ih-ec2 doesn't report the formula's version, $VERSION"
+            exit 1
+          fi
+
+      - name: brew uninstall
+        run: |
+          brew uninstall --formula "$FORMULA"
+          bin="$(brew --prefix)/bin"
+          if [ -e "$bin/ih-ec2" ] || [ -L "$bin/ih-ec2" ]; then
+            echo "::error::$bin/ih-ec2 is still there after brew uninstall"
+            exit 1
+          fi
+          echo "Uninstalled: $bin/ih-ec2 is gone"
