@@ -1,8 +1,8 @@
 class InfrahouseToolkit < Formula
   desc "Command-line tools for InfraHouse infrastructure"
   homepage "https://github.com/infrahouse/infrahouse-toolkit"
-  url "https://github.com/infrahouse/infrahouse-toolkit/releases/download/v2.68.1/infrahouse-toolkit-2.68.1-macos-arm64.tar.gz"
-  sha256 "dba5904b612e420cb6472fd8f10bb4c3c43f0a7581946d9cbd2bc2949621e0e9"
+  url "https://github.com/infrahouse/infrahouse-toolkit/releases/download/v2.68.3/infrahouse-toolkit-2.68.3-macos-arm64.tar.gz"
+  sha256 "005ba8cb52d299db92ce2092cceadd3584e6ab81415415fbb52998af55e02e3e"
   license "Apache-2.0"
 
   depends_on arch: :arm64
