@@ -26,9 +26,37 @@ and imports the native modules (`nacl.bindings`, `cryptography.hazmat.bindings._
   `MACOS_FLOOR`, the first macOS with `realpath(1)`, which the scripts' header needs.
 - **No dependencies, no `resource` blocks, no bottles.** The formula builds nothing, so there is nothing to bottle.
 
-## Updating the Formula for a New Release
+## How a New Release Reaches the Formula
 
-Until the toolkit's release opens this pull request itself (IH-190), it is done by hand:
+The toolkit's release opens the pull request (IH-190). On the push that bumps the toolkit's version, after
+`publish-macos` attached the tarball and its `.sha256` to the release `v<version>`, the job `publish-homebrew` in the
+toolkit's `.github/workflows/python-CD.yml`:
+
+1. checks the release's tarball against its `.sha256`, downloaded from the url the formula gets;
+2. stops, green, if the formula on `main` already has that version or a newer one, or if an open pull request here
+   is for a newer one;
+3. changes `url` and `sha256` (and `version`, if the formula ever gets that line), and fails if the change touches
+   any other line;
+4. pushes the branch `toolkit-<version>`, one commit on `main` authored by `infrahouse-homebrew-tap[bot]`, and opens
+   the pull request `infrahouse-toolkit <version>`, whose body links the release and the CD run. A re-run updates the
+   open pull request instead of opening a second one.
+
+The pull request comes from the GitHub App `infrahouse-homebrew-tap`, installed on this repository only, with Contents
+and Pull requests read and write. Its private key is in KMS, and only the toolkit's `publish-homebrew` job can sign
+with it: the toolkit's `packaging/README.md`, "How a release reaches the Homebrew formula", has the App, the key, the
+role, the rotation and what to do when the job fails. A pull request from an App starts this repository's CI, so
+`infrahouse-toolkit formula` checks it. Aleks merges it; nothing merges it automatically, and auto-merge stays off.
+
+- **The branch `toolkit-<version>` belongs to the toolkit's CD.** A re-run resets it to `main` plus the change. Don't
+  push to it; make anything else a pull request of its own.
+- **The formula's layout is part of the contract.** The job expects one `url`, one `sha256`, at most one `version`
+  and no `mirror`. A change to that (a `resource`, `bottle` or `on_arm` block, a second `url`) fails the toolkit's
+  run until `packaging/homebrew/open-formula-pr.sh` in the toolkit learns the new layout; until then, use the hand
+  edit below.
+
+## Updating the Formula by Hand
+
+The fallback, when the toolkit's `publish-homebrew` can't open the pull request (its run says why):
 
 1. Download the release's tarball and `.sha256`, and check one against the other:
 
@@ -48,7 +76,10 @@ Until the toolkit's release opens this pull request itself (IH-190), it is done 
 3. The formula has no `version` line: Homebrew infers the version from the file name (`2.68.1` from
    `infrahouse-toolkit-2.68.1-macos-arm64.tar.gz`). If it ever gets one, update it too. CI fails if `brew info` shows
    a version that isn't `<major>.<minor>.<patch>`.
-4. Open a pull request. Its CI installs and tests the new formula.
+4. Open a pull request from a branch named `toolkit-<version>`. Its CI installs and tests the new formula. With that
+   branch name, a later re-run of `publish-homebrew` finds the pull request and updates it rather than opening a
+   second one. This is the one time to push to that branch yourself: it holds the same change CD would make, and a
+   re-run replaces your commit with CD's single commit of that change, which is what the rule above expects.
 
 ## Testing
 
@@ -64,7 +95,7 @@ CI is the test: it installs the formula on a clean runner. Don't run `brew insta
   (`repos.tf`, `required_status_checks`): rename the job in both places together.
 - **vuln-scanner-pr.yml** (check `vulnerability-check / osv-scan`, required): OSV-Scanner on pull requests.
 - Actions are pinned by commit sha, with the version in a comment.
-- Nothing publishes: no bottles, no `pr-pull`.
+- Nothing publishes: no bottles, no `pr-pull`. Formula updates arrive as pull requests from the toolkit's CD (above).
 
 ## Files Managed by github-control
 
